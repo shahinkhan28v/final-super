@@ -77,6 +77,11 @@ export default function Withdraw() {
     e.preventDefault();
     if (!profile?.uid || !settings) return;
 
+    if (profile.withdrawalsDisabled) {
+      setError('Withdrawals are temporarily disabled for your account. Please contact support.');
+      return;
+    }
+
     if (amount < minWithdrawal) {
       setError(`Minimum withdrawal is ${minWithdrawal} points`);
       return;

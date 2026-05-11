@@ -121,6 +121,12 @@ service cloud.firestore {
       allow write: if hasPermission('manage_tasks');
     }
 
+    // Reward Shop Tasks
+    match /reward_tasks/{taskId} {
+      allow read: if isSignedIn();
+      allow write: if hasPermission('manage_tasks');
+    }
+
     // User Specific Records
     match /users/{userId}/quiz_attempts/{quizId} {
       allow read: if isOwner(userId) || hasPermission('manage_users');
@@ -128,6 +134,11 @@ service cloud.firestore {
     }
 
     match /users/{userId}/tasks/{taskId} {
+      allow read: if isOwner(userId) || hasPermission('manage_tasks');
+      allow create, update: if isOwner(userId);
+    }
+
+    match /users/{userId}/reward_tasks/{taskId} {
       allow read: if isOwner(userId) || hasPermission('manage_tasks');
       allow create, update: if isOwner(userId);
     }

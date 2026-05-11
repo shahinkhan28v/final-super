@@ -302,12 +302,27 @@ export default function AdminSettings() {
             </div>
 
             <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">App Download Link</label>
+              <div className="relative">
+                <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input 
+                  type="text"
+                  value={settings?.appDownloadUrl || ''}
+                  onChange={(e) => updateField('appDownloadUrl', e.target.value)}
+                  placeholder="https://play.google.com/store/apps/details?id=..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-11 pr-4 py-3 font-bold text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 mt-1.5 font-medium italic">Link shown in user sidebar for app download</p>
+            </div>
+
+            <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Terms & Conditions</label>
               <textarea 
                 value={settings?.termsAndConditions || ''}
                 onChange={(e) => updateField('termsAndConditions', e.target.value)}
-                rows={3}
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 font-medium text-[10px]"
+                rows={6}
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 font-medium text-[11px] leading-relaxed"
               />
             </div>
           </div>

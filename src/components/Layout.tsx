@@ -16,7 +16,9 @@ import {
   HelpCircle,
   FileText,
   ShieldCheck,
-  ChevronLeft
+  ChevronLeft,
+  Smartphone,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
 import { getAppSettings } from '../lib/dataService';
@@ -137,7 +139,7 @@ export default function Layout() {
                   <X className="w-6 h-6 text-zinc-400" />
                 </button>
               </div>
-              <div className="flex-1 py-4">
+              <div className="flex-1 py-4 overflow-y-auto">
                 {menuItems.map((item) => (
                   <Link
                     key={item.name}
@@ -149,6 +151,32 @@ export default function Layout() {
                     <span className="font-medium">{item.name}</span>
                   </Link>
                 ))}
+
+                {settings?.appDownloadUrl && (
+                  <div className="mx-4 mt-6">
+                    <a 
+                      href={settings.appDownloadUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-indigo-600 rounded-2xl p-6 text-white flex flex-col gap-3 relative overflow-hidden shadow-lg group block"
+                    >
+                      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                        <Smartphone className="w-16 h-16" />
+                      </div>
+                      <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                        <Smartphone className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-black text-sm uppercase tracking-wider">Official App</h4>
+                        <p className="text-indigo-100 text-[10px] font-medium leading-relaxed mt-1">Download our native application for faster access and exclusive rewards.</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest mt-2 border-t border-white/10 pt-3">
+                         <Download className="w-3 h-3" />
+                         Download Now
+                      </div>
+                    </a>
+                  </div>
+                )}
               </div>
               <div className="p-6 border-t border-zinc-100">
                 <button 

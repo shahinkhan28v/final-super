@@ -35,10 +35,11 @@ import { Link } from 'react-router-dom';
 type View = 'main' | 'notifications' | 'language' | 'password' | 'bank' | 'privacy' | 'help' | 'device_history';
 
 export default function Account() {
-  const { profile, logout } = useAuth();
+  const { profile, logout, updateUserPassword, user } = useAuth();
   const [view, setView] = useState<View>('main');
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   // States for forms
   const [lang, setLang] = useState('English');
@@ -46,7 +47,9 @@ export default function Account() {
     method: '',
     details: ''
   });
-  const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+  const [passwords, setPasswords] = useState({ new: '', confirm: '' });
+
+  const isGoogleUser = user?.providerData.some(p => p.providerId === 'google.com');
 
   React.useEffect(() => {
     async function load() {
@@ -80,11 +83,33 @@ export default function Account() {
     alert('Bank information updated successfully!');
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Implementation placeholder for password change
-    alert('Password change functionality requested. A verification email will be sent to your registered address.');
-    setView('main');
+    setError(null);
+    if (!passwords.new || !passwords.confirm) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (passwords.new.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    if (passwords.new !== passwords.confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await updateUserPassword(passwords.new);
+      alert('Password updated successfully! You can now login with your email and this password.');
+      setView('main');
+      setPasswords({ new: '', confirm: '' });
+    } catch (err: any) {
+      setError(err.message || "Failed to update password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const settingsItems = [
@@ -331,40 +356,67 @@ export default function Account() {
 
   const renderPassword = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader('Update Security')}
+      {renderHeader(isGoogleUser ? 'Set Account Password' : 'Change Password')}
+      
+      {isGoogleUser && (
+        <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl flex gap-3 mb-6">
+           <Info className="w-5 h-5 text-indigo-500 shrink-0" />
+           <p className="text-[11px] font-medium text-indigo-700 leading-relaxed">
+             You signed in with Google. Set a password here so you can log in directly with your email <b>{profile?.email}</b> later.
+           </p>
+        </div>
+      )}
+
       <form onSubmit={handlePasswordChange} className="space-y-6">
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-           <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">Current Password</label>
-              <input 
-                type="password" 
-                className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-indigo-600 outline-none transition-all"
-              />
-           </div>
-           <div className="h-px bg-slate-50 my-2"></div>
+           {error && (
+             <div className="bg-rose-50 border border-rose-100 p-3 rounded-xl flex items-center gap-2 text-rose-600 mb-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span className="text-[11px] font-bold">{error}</span>
+             </div>
+           )}
+           
            <div>
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">New Secure Password</label>
-              <input 
-                type="password" 
-                className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-indigo-600 outline-none transition-all"
-              />
+              <div className="relative">
+                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                 <input 
+                   type="password" 
+                   value={passwords.new}
+                   onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                   placeholder="Min 6 characters"
+                   className="w-full pl-12 pr-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-indigo-600 outline-none transition-all placeholder:text-slate-300"
+                 />
+              </div>
            </div>
            <div>
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">Confirm New Password</label>
-              <input 
-                type="password" 
-                className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-indigo-600 outline-none transition-all"
-              />
+              <div className="relative">
+                 <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                 <input 
+                   type="password" 
+                   value={passwords.confirm}
+                   onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                   placeholder="Verify password"
+                   className="w-full pl-12 pr-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-indigo-600 outline-none transition-all placeholder:text-slate-300"
+                 />
+              </div>
            </div>
         </div>
 
         <button 
           type="submit"
-          className="w-full py-4 bg-slate-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-100 flex items-center justify-center gap-2 hover:bg-slate-700 active:scale-95 transition-all"
+          disabled={loading}
+          className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-100 flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-50"
         >
-          Update Password
+          {loading ? 'Changing...' : isGoogleUser ? 'Set Password' : 'Update Password'}
         </button>
-        <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest">Forgot your password? Click for email reset.</p>
+        
+        <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+          {isGoogleUser 
+            ? "Your Google login will still work. This just adds a manual login option."
+            : "Forgot your password? You can reset it from the login screen."}
+        </p>
       </form>
     </motion.div>
   );

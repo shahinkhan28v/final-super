@@ -18,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { handleFirestoreError, OperationType } from './firebaseUtils';
-import { EarningLog, EarningType, WithdrawalRequest, UserProfile, AppSettings, Banner, Task, UserTask, TaskStatus, SupportChat, ChatMessage, AdminRecord, AdminPermission, Quiz, QuizQuestion, UserQuizAttempt } from '../types';
+import { EarningLog, EarningType, WithdrawalRequest, UserProfile, AppSettings, Banner, Task, UserTask, TaskStatus, SupportChat, ChatMessage, AdminRecord, AdminPermission, Quiz, QuizQuestion, UserQuizAttempt, RewardTask, UserRewardTaskStatus } from '../types';
 
 function clean(obj: any): any {
   const result: any = {};
@@ -335,6 +335,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   bannerAutoSlide: true,
   bannerInterval: 7,
   supportEmail: 'support@pointhub.com',
+  appDownloadUrl: '',
   mlmLevel1Percent: 10,
   mlmLevel2Percent: 5,
   mlmLevel3Percent: 3,
@@ -1057,5 +1058,122 @@ export async function getReferralsWithStats(userId: string) {
   } catch (error) {
     console.error("Error fetching referrals with stats:", error);
     return [];
+  }
+}
+
+// --- Reward Task Methods (Reward Shop) ---
+
+export function subscribeToAllRewardTasks(callback: (tasks: RewardTask[]) => void) {
+  const path = 'reward_tasks';
+  const q = query(collection(db, path), orderBy('orderIndex', 'asc'));
+  return onSnapshot(q, (snap) => {
+    callback(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as RewardTask)));
+  });
+}
+
+export async function getAllRewardTasks(onlyActive = false) {
+  const path = 'reward_tasks';
+  try {
+    let q = query(collection(db, path), orderBy('orderIndex', 'asc'));
+    if (onlyActive) q = query(q, where('isActive', '==', true));
+    const snap = await getDocs(q);
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as RewardTask));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, path);
+    return [];
+  }
+}
+
+export async function addRewardTask(task: Omit<RewardTask, 'id'>) {
+  const path = 'reward_tasks';
+  try {
+    await addDoc(collection(db, path), clean(task));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, path);
+  }
+}
+
+export async function updateRewardTask(id: string, task: Partial<RewardTask>) {
+  const path = 'reward_tasks';
+  try {
+    await updateDoc(doc(db, path, id), clean(task));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, path);
+  }
+}
+
+export async function deleteRewardTask(id: string) {
+  const path = 'reward_tasks';
+  try {
+    await deleteDoc(doc(db, path, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+}
+
+export async function getUserRewardTasks(userId: string) {
+  const path = `users/${userId}/reward_tasks`;
+  try {
+    const snap = await getDocs(collection(db, path));
+    const tasks: Record<string, UserRewardTaskStatus> = {};
+    snap.docs.forEach(doc => {
+      tasks[doc.id] = doc.data() as UserRewardTaskStatus;
+    });
+    return tasks;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.LIST, path);
+    return {};
+  }
+}
+
+export async function startRewardTask(userId: string, taskId: string) {
+  const path = `users/${userId}/reward_tasks/${taskId}`;
+  try {
+    const ref = doc(db, 'users', userId, 'reward_tasks', taskId);
+    await setDoc(ref, {
+      userId,
+      taskId,
+      status: 'verifying',
+      startTime: new Date().toISOString()
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+  }
+}
+
+export async function claimRewardTask(userId: string, task: RewardTask) {
+  const path = `users/${userId}/reward_tasks/${task.id!}`;
+  try {
+    const ref = doc(db, 'users', userId, 'reward_tasks', task.id!);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return { success: false, message: 'Task not started' };
+    
+    const data = snap.data() as UserRewardTaskStatus;
+    if (data.status === 'completed') return { success: false, message: 'Already claimed' };
+
+    // Check time
+    const startTime = new Date(data.startTime!);
+    const now = new Date();
+    const diffMinutes = (now.getTime() - startTime.getTime()) / (1000 * 60);
+
+    if (diffMinutes < task.waitMinutes) {
+      return { 
+        success: false, 
+        message: `Please wait ${Math.ceil(task.waitMinutes - diffMinutes)} more minutes for verification.` 
+      };
+    }
+
+    // Complete the task
+    await updateDoc(ref, {
+      status: 'completed',
+      completedAt: now.toISOString()
+    });
+
+    await addEarnings(userId, `Reward: ${task.title}`, task.points, 'task');
+    
+    return { success: true };
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, path);
+    throw error;
   }
 }

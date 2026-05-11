@@ -33,6 +33,8 @@ export interface UserProfile {
     os: string;
     isMobile: boolean;
   };
+  isBlocked?: boolean;
+  withdrawalsDisabled?: boolean;
 }
 
 export interface WheelSlice {
@@ -103,6 +105,7 @@ export interface AppSettings {
   bannerAutoSlide: boolean;
   bannerInterval: number;
   supportEmail: string;
+  appDownloadUrl: string;
   mlmLevel1Percent: number;
   mlmLevel2Percent: number;
   mlmLevel3Percent: number;
@@ -113,6 +116,27 @@ export interface AppSettings {
   privacyPolicy: string;
   footerAbout: string;
   luckyWheel: LuckyWheelConfig;
+}
+
+export interface RewardTask {
+  id?: string;
+  title: string;
+  description: string;
+  icon?: string; // Lucide icon name
+  link?: string; // The URL to visit
+  points: number;
+  type: string;
+  waitMinutes: number; // Verification time
+  isActive: boolean;
+  orderIndex: number;
+}
+
+export interface UserRewardTaskStatus {
+  userId: string;
+  taskId: string;
+  status: 'pending' | 'verifying' | 'completed';
+  startTime?: string;
+  completedAt?: string;
 }
 
 export interface Banner {

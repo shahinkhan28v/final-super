@@ -6,7 +6,8 @@ import {
   GoogleAuthProvider,
   signOut,
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword
+  createUserWithEmailAndPassword,
+  updatePassword
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase';
@@ -22,6 +23,7 @@ interface AuthContextType {
   signIn: () => Promise<void>;
   signInEmail: (email: string, pass: string) => Promise<void>;
   signUpEmail: (email: string, pass: string, name: string) => Promise<void>;
+  updateUserPassword: (newPass: string) => Promise<void>;
   logout: () => Promise<void>;
   hasPermission: (permission: AdminPermission) => boolean;
 }
@@ -201,6 +203,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOut(auth);
   };
 
+  const updateUserPassword = async (newPass: string) => {
+    if (!user) throw new Error("No user logged in.");
+    try {
+      await updatePassword(user, newPass);
+    } catch (err: any) {
+      if (err.code === 'auth/requires-recent-login') {
+        throw new Error('For security, please logout and log back in before changing your password.');
+      }
+      throw err;
+    }
+  };
+
   const hasPermission = (permission: AdminPermission): boolean => {
     if (user?.email === SUPER_ADMIN_EMAIL) return true;
     if (!adminRecord) return false;
@@ -211,7 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{ 
       user, profile, adminRecord, loading, 
-      signIn, signInEmail, signUpEmail,
+      signIn, signInEmail, signUpEmail, updateUserPassword,
       logout, hasPermission 
     }}>
       {children}

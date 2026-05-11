@@ -6,6 +6,7 @@ import {
   CreditCard, 
   Settings, 
   Gift, 
+  Star,
   LogOut,
   RotateCw,
   ChevronRight,
@@ -66,6 +67,7 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       label: 'Content & Rewards',
       items: [
         { to: '/admin/tasks', icon: Gift, label: 'Task Center', permission: 'manage_tasks' },
+        { to: '/admin/reward-shop', icon: Star, label: 'Reward Shop', permission: 'manage_tasks' },
         { to: '/admin/quizzes', icon: Puzzle, label: 'Quiz Engine', permission: 'manage_tasks' },
         { to: '/admin/wheel', icon: RotateCw, label: 'Win Lab', permission: 'manage_settings' },
         { to: '/admin/banners', icon: ImageIcon, label: 'Ad Media', permission: 'manage_banners' },

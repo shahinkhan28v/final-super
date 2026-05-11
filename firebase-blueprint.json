@@ -230,6 +230,14 @@
     "/settings/global": {
       "schema": "AppSetting",
       "description": "Global app settings"
+    },
+    "/reward_tasks/{taskId}": {
+      "schema": "RewardTask",
+      "description": "Reward shop tasks"
+    },
+    "/users/{userId}/reward_tasks/{taskId}": {
+      "schema": "UserRewardTask",
+      "description": "User specific reward task status"
     }
   }
 }

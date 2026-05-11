@@ -18,26 +18,66 @@ export async function getDeviceInfo() {
   let ip = "0.0.0.0";
   let location = { city: 'Unknown', country: 'Unknown', region: 'Unknown' };
 
-  try {
-    // We'll try to get more detailed data
-    const res = await fetch('https://ipapi.co/json/');
-    if (!res.ok) throw new Error('Primary Geo API failed');
-    const data = await res.json();
-    
-    ip = data.ip || "0.0.0.0";
-    location = {
-      city: data.city || data.region || 'Unknown',
-      country: data.country_name || 'Unknown',
-      region: data.region || 'Unknown'
-    };
-  } catch (e) {
-    console.error("Geo API Error:", e);
-    // Fallback if possible
+  const geoAPIs = [
+    {
+      url: 'https://ipapi.co/json/',
+      parser: (d: any) => ({
+        ip: d.ip,
+        city: d.city || d.region,
+        country: d.country_name,
+        region: d.region
+      })
+    },
+    {
+      url: 'https://freeipapi.com/api/json',
+      parser: (d: any) => ({
+        ip: d.ipAddress,
+        city: d.cityName,
+        country: d.countryName,
+        region: d.regionName
+      })
+    },
+    {
+      url: 'https://ip.seeip.org/geoip',
+      parser: (d: any) => ({
+        ip: d.ip,
+        city: d.city,
+        country: d.country,
+        region: d.region
+      })
+    }
+  ];
+
+  for (const api of geoAPIs) {
     try {
-      const res = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      ip = data.ip;
-    } catch (e2) {}
+      const res = await fetch(api.url, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        const data = await res.json();
+        const parsed = api.parser(data);
+        if (parsed.ip) {
+          ip = parsed.ip;
+          location = {
+            city: parsed.city || 'Unknown',
+            country: parsed.country || 'Unknown',
+            region: parsed.region || 'Unknown'
+          };
+          break; // Success!
+        }
+      }
+    } catch (e) {
+      // Continue to next API
+    }
+  }
+
+  // Final fallback for IP only if location failed
+  if (ip === "0.0.0.0") {
+    try {
+      const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(2000) });
+      if (res.ok) {
+        const data = await res.json();
+        ip = data.ip || ip;
+      }
+    } catch (e) {}
   }
 
   return {

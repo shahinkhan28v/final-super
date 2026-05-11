@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { signOut } from 'firebase/auth';
+import { auth } from './lib/firebase';
+import { ShieldAlert } from 'lucide-react';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Rewards from './pages/Rewards';
@@ -23,7 +26,10 @@ import AdminQuizzes from './pages/admin/Quizzes';
 import AdminLuckyWheel from './pages/admin/LuckyWheel';
 import AdminReferrals from './pages/admin/Referrals';
 import AdminIpDetection from './pages/admin/IpDetection';
+import AdminRewardTasks from './pages/admin/RewardTasks';
 import Quizzes from './pages/Quizzes';
+import Terms from './pages/Terms';
+import Support from './pages/Support';
 import QuizPlayer from './pages/QuizPlayer';
 import LuckyWheel from './pages/LuckyWheel';
 import AdminSupport from './pages/admin/Support';
@@ -43,12 +49,36 @@ function ReferralTracker() {
 }
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
     </div>
   );
+  
+  if (user && profile?.isBlocked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+        <div className="bg-white rounded-3xl shadow-xl shadow-rose-100 p-8 max-w-md w-full text-center">
+           <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShieldAlert className="w-10 h-10 text-rose-600" />
+           </div>
+           <h1 className="text-2xl font-black text-slate-900 mb-2">Account Blocked</h1>
+           <p className="text-slate-500 font-medium text-sm leading-relaxed mb-6">
+             Your account has been blocked due to a violation of our terms of service. 
+             If you believe this is a mistake, please contact our support team.
+           </p>
+           <button 
+             onClick={() => signOut(auth)}
+             className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all"
+           >
+             Sign Out
+           </button>
+        </div>
+      </div>
+    );
+  }
+
   return user ? <>{children}</> : <Navigate to="/login" />;
 }
 
@@ -82,7 +112,9 @@ export default function App() {
             <Route path="tasks" element={<Tasks />} />
             <Route path="refer" element={<Refer />} />
             <Route path="account" element={<Account />} />
+            <Route path="support" element={<Support />} />
             <Route path="support/chat" element={<SupportChatPage />} />
+            <Route path="terms" element={<Terms />} />
             <Route path="history" element={<History />} />
             <Route path="withdraw" element={<Withdraw />} />
           </Route>
@@ -98,6 +130,7 @@ export default function App() {
               <Route path="wheel" element={<PermissionRoute permission="manage_settings"><AdminLuckyWheel /></PermissionRoute>} />
               <Route path="banners" element={<PermissionRoute permission="manage_banners"><AdminBanners /></PermissionRoute>} />
               <Route path="tasks" element={<PermissionRoute permission="manage_tasks"><AdminTasks /></PermissionRoute>} />
+              <Route path="reward-shop" element={<PermissionRoute permission="manage_tasks"><AdminRewardTasks /></PermissionRoute>} />
               <Route path="support" element={<PermissionRoute permission="manage_support"><AdminSupport /></PermissionRoute>} />
               <Route path="settings" element={<PermissionRoute permission="manage_settings"><AdminSettings /></PermissionRoute>} />
               <Route path="referrals" element={<PermissionRoute permission="manage_settings"><AdminReferrals /></PermissionRoute>} />
