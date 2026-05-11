@@ -161,8 +161,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider.setCustomParameters({ prompt: 'select_account' });
       await signInWithPopup(auth, provider);
     } catch (err: any) {
+      console.error("Sign in error:", err);
       if (err.code === 'auth/popup-blocked') {
-        throw new Error('Popup blocked. Please allow popups.');
+        throw new Error('পপআপ ব্লক করা হয়েছে। অনুগ্রহ করে ব্রাউজারে পপআপ অ্যালাউ করুন।');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        throw new Error(`এই ডোমেইনটি (${window.location.hostname}) অনুমোদিত নয়। অনুগ্রহ করে Firebase Console > Authentication > Settings > Authorized domains-এ এই ইউআরএলটি যোগ করুন।`);
+      } else if (err.code === 'auth/disallowed-useragent') {
+        throw new Error('গুগল এই ব্রাউজারটি সমর্থন করে না। অনুগ্রহ করে ক্রোম (Chrome) বা অন্য কোনো স্ট্যান্ডার্ড ব্রাউজারে অ্যাপটি ওপেন করুন।');
       }
       throw err;
     }
