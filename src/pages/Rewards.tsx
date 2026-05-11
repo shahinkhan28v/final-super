@@ -27,7 +27,7 @@ import {
 import { useAuth } from '../lib/AuthContext';
 import { addEarnings, subscribeToAllRewardTasks, getUserRewardTasks, startRewardTask, claimRewardTask } from '../lib/dataService';
 import { useState } from 'react';
-import { cn } from '../lib/utils';
+import { cn, openExternalLink } from '../lib/utils';
 import { RewardTask, UserRewardTaskStatus } from '../types';
 import { useNavigate } from 'react-router-dom';
 
@@ -76,7 +76,7 @@ export default function Rewards() {
     if (!status) {
       // Start task
       if (task.link) {
-        window.open(task.link, '_blank');
+        openExternalLink(task.link);
       }
       await startRewardTask(profile.uid, task.id!);
       const updated = await getUserRewardTasks(profile.uid);

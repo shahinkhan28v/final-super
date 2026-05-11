@@ -18,7 +18,7 @@ import {
 import { useAuth } from '../lib/AuthContext';
 import { getAllTasks, getUserTasks, startUserTask, verifyUserTask, getAppSettings } from '../lib/dataService';
 import { Task, UserTask, TaskStatus, AppSettings } from '../types';
-import { cn } from '../lib/utils';
+import { cn, openExternalLink } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function TaskList() {
@@ -69,9 +69,9 @@ export default function TaskList() {
     if (!user || !task.id) return;
     setShowAdPopup({ active: false, task: null });
     await startUserTask(user.uid, task.id);
-    window.open(task.targetUrl, '_blank');
+    openExternalLink(task.targetUrl);
     if (settings?.adsterraTaskPopupBanner) {
-      window.open(settings.adsterraTaskPopupBanner, '_blank');
+      openExternalLink(settings.adsterraTaskPopupBanner);
     }
     await loadData();
   };

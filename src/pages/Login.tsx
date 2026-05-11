@@ -8,23 +8,37 @@ type LoginMethod = 'google' | 'email';
 type EmailMode = 'signin' | 'signup';
 
 export default function Login() {
-  const { user, signIn, signInEmail, signUpEmail, loading } = useAuth();
+  const { user, signIn, signInRedirect, signInEmail, signUpEmail, loading, authError } = useAuth();
   const navigate = useNavigate();
   const [method, setMethod] = useState<LoginMethod>('google');
   const [emailMode, setEmailMode] = useState<EmailMode>('signin');
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [referralInput, setReferralInput] = useState('');
+  
+  const displayError = localError || authError;
   
   // Email states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isWebView, setIsWebView] = useState(false);
 
   useEffect(() => {
     const savedRef = sessionStorage.getItem('referralCode');
     if (savedRef) {
       setReferralInput(savedRef);
+    }
+
+    // Detect WebView
+    const ua = navigator.userAgent;
+    const rules = [
+      'WebView', '(iPhone|iPod|iPad)(?!.*Safari\/)', 'Android.*(wv|\.0\.0\.0)',
+      'FBAN', 'FBAV', 'Instagram', 'Twitter', 'Line', 'Threads'
+    ];
+    const regex = new RegExp(rules.join('|'), 'ig');
+    if (regex.test(ua)) {
+      setIsWebView(true);
     }
   }, []);
 
@@ -33,18 +47,22 @@ export default function Login() {
   const handleGoogleSignIn = async () => {
     saveReferral();
     try {
-      await signIn();
-      navigate('/');
+      if (isWebView) {
+        await signInRedirect();
+      } else {
+        await signIn();
+        navigate('/');
+      }
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in. Please try again.');
+      setLocalError(err.message || 'Failed to sign in. Please try again.');
     }
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     saveReferral();
-    if (!email || !password) return setError('Please fill in all fields.');
-    if (emailMode === 'signup' && !name) return setError('Please enter your name.');
+    if (!email || !password) return setLocalError('Please fill in all fields.');
+    if (emailMode === 'signup' && !name) return setLocalError('Please enter your name.');
 
     try {
       if (emailMode === 'signin') {
@@ -54,7 +72,7 @@ export default function Login() {
       }
       navigate('/');
     } catch (err: any) {
-      setError(err.message);
+      setLocalError(err.message);
     }
   };
 
@@ -110,7 +128,7 @@ export default function Login() {
           {(['google', 'email'] as LoginMethod[]).map((m) => (
             <button
               key={m}
-              onClick={() => { setMethod(m); setError(null); }}
+              onClick={() => { setMethod(m); setLocalError(null); }}
               className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
                 method === m ? 'bg-white shadow-sm text-indigo-600 scale-105' : 'text-slate-400'
               }`}
@@ -129,6 +147,26 @@ export default function Login() {
               exit={{ opacity: 0, x: 20 }}
               className="w-full"
             >
+              {isWebView && (
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-100 rounded-2xl text-left">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight mb-1">
+                        Secure Browser Required
+                      </p>
+                      <p className="text-[10px] text-amber-600 font-medium leading-relaxed">
+                        গুগল এই ব্রাউজারে লগইন ব্লক করতে পারে। ভালো অভিজ্ঞতার জন্য:
+                      </p>
+                      <ul className="text-[9px] text-amber-600 font-bold mt-2 space-y-1 list-disc ml-3 uppercase">
+                        <li>উপরে ডানদিকের ৩ ডটে ক্লিক করুন</li>
+                        <li>"Open in Chrome" বা ডিফল্ট ব্রাউজারে খুলুন</li>
+                        <li>অথবা ইমেইল মেথড ব্যবহার করুন</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
               <button 
                 onClick={handleGoogleSignIn}
                 disabled={loading}
@@ -223,14 +261,14 @@ export default function Login() {
           )}
         </AnimatePresence>
 
-        {error && (
+        {displayError && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-4 flex items-center gap-2 text-rose-500 text-[10px] font-bold bg-rose-50 p-3 rounded-lg border border-rose-100 w-full justify-center"
           >
              <AlertCircle className="w-4 h-4 flex-shrink-0" />
-             <span className="text-left">{error}</span>
+             <span className="text-left">{displayError}</span>
           </motion.div>
         )}
 

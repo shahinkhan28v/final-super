@@ -3,6 +3,8 @@ import {
   onAuthStateChanged, 
   User, 
   signInWithPopup, 
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   signInWithEmailAndPassword,
@@ -20,7 +22,9 @@ interface AuthContextType {
   profile: UserProfile | null;
   adminRecord: AdminRecord | null;
   loading: boolean;
+  authError: string | null;
   signIn: () => Promise<void>;
+  signInRedirect: () => Promise<void>;
   signInEmail: (email: string, pass: string) => Promise<void>;
   signUpEmail: (email: string, pass: string, name: string) => Promise<void>;
   updateUserPassword: (newPass: string) => Promise<void>;
@@ -35,10 +39,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [adminRecord, setAdminRecord] = useState<AdminRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const SUPER_ADMIN_EMAIL = 'shahinkhan28dd@gmail.com';
 
   useEffect(() => {
+    // Check for redirect result on load
+    getRedirectResult(auth).catch((err: any) => {
+      console.error("Redirect auth error:", err);
+      if (err.code === 'auth/disallowed-useragent') {
+        setAuthError('Google login is not supported in this browser. Please use Chrome or sign in via Email.');
+      }
+    });
+
     let unsubProfile: (() => void) | null = null;
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -158,6 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async () => {
+    setAuthError(null);
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
@@ -171,6 +185,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (err.code === 'auth/disallowed-useragent') {
         throw new Error('গুগল এই ব্রাউজারটি সমর্থন করে না। অনুগ্রহ করে ক্রোম (Chrome) বা অন্য কোনো স্ট্যান্ডার্ড ব্রাউজারে অ্যাপটি ওপেন করুন।');
       }
+      throw err;
+    }
+  };
+
+  const signInRedirect = async () => {
+    setAuthError(null);
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithRedirect(auth, provider);
+    } catch (err: any) {
+      console.error("Redirect sign in error:", err);
       throw err;
     }
   };
@@ -224,8 +250,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{ 
-      user, profile, adminRecord, loading, 
-      signIn, signInEmail, signUpEmail, updateUserPassword,
+      user, profile, adminRecord, loading, authError,
+      signIn, signInRedirect, signInEmail, signUpEmail, updateUserPassword,
       logout, hasPermission 
     }}>
       {children}

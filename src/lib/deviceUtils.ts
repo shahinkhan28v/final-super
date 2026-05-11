@@ -87,7 +87,24 @@ export async function getDeviceInfo() {
     deviceInfo: {
       browser,
       os,
-      isMobile
+      isMobile,
+      isWebView: isWebView(ua)
     }
   };
+}
+
+function isWebView(ua: string) {
+  const rules = [
+    'WebView',
+    '(iPhone|iPod|iPad)(?!.*Safari\/)',
+    'Android.*(wv|\.0\.0\.0)',
+    'FBAN',
+    'FBAV',
+    'Instagram',
+    'Twitter',
+    'Line',
+    'Threads'
+  ];
+  const regex = new RegExp(rules.join('|'), 'ig');
+  return regex.test(ua);
 }
