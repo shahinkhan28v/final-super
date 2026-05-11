@@ -1,0 +1,235 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and point data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "points": { "type": "number" },
+        "totalEarnings": { "type": "number" },
+        "referralCode": { "type": "string" },
+        "referredBy": { "type": "string" },
+        "joinedAt": { "type": "string", "format": "date-time" },
+        "profilePic": { "type": "string" },
+        "paymentInfo": {
+          "type": "object",
+          "properties": {
+            "method": { "type": "string" },
+            "details": { "type": "string" }
+          }
+        },
+        "streak": { "type": "number" },
+        "lastCheckIn": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "points"]
+    },
+    "Earning": {
+      "title": "Earning",
+      "description": "History of points earned",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "taskName": { "type": "string" },
+        "points": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["daily_bonus", "quiz", "video", "referral", "survey", "task", "offer"] }
+      },
+      "required": ["userId", "taskName", "points", "timestamp"]
+    },
+    "Withdrawal": {
+      "title": "Withdrawal",
+      "description": "Withdrawal request data",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "method": { "type": "string" },
+        "details": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "currency", "status", "method", "details", "timestamp"]
+    },
+    "AppSetting": {
+      "title": "AppSetting",
+      "description": "Global application configuration",
+      "type": "object",
+      "properties": {
+        "conversionRate": { "type": "number", "description": "Points per 1 USD" },
+        "minWithdrawal": { "type": "number" },
+        "referralBonus": { "type": "number" },
+        "dailyBonusBase": { "type": "number" },
+        "videoPointReward": { "type": "number" },
+        "bannerAutoSlide": { "type": "boolean" },
+        "bannerInterval": { "type": "number" }
+      }
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "Promotional banner for the dashboard",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "linkUrl": { "type": "string" },
+        "buttonText": { "type": "string" },
+        "type": { "type": "string", "enum": ["promotion", "offer", "news", "alert"] },
+        "orderIndex": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["imageUrl", "isActive"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Earnings task for users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["visit_website", "watch_youtube", "submit_form", "download_app"] },
+        "targetUrl": { "type": "string" },
+        "requiredSeconds": { "type": "number" },
+        "rewardPoints": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "category": { "type": "string" }
+      },
+      "required": ["title", "type", "rewardPoints", "isActive"]
+    },
+    "UserTask": {
+      "title": "User Task Status",
+      "description": "Tracks a user's progress on a task",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "started", "completed", "failed"] },
+        "startedAt": { "type": "string" },
+        "completedAt": { "type": "string" },
+        "watchedSeconds": { "type": "number" }
+      }
+    },
+    "SupportChat": {
+      "title": "Support Chat",
+      "description": "Information about a support ticket/chat session",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "accountNumber": { "type": "string" },
+        "lastMessage": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "unreadCount": { "type": "number" }
+      }
+    },
+    "ChatMessage": {
+      "title": "Chat Message",
+      "description": "A single message in a support chat",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "senderRole": { "type": "string", "enum": ["user", "admin"] },
+        "text": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "timestamp": { "type": "string" }
+      }
+    },
+    "Quiz": {
+      "title": "Quiz",
+      "description": "Available quizzes for users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "rewardPoints": { "type": "number" },
+        "timeLimit": { "type": "number" },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "question": { "type": "string" },
+              "options": { "type": "array", "items": { "type": "string" } },
+              "correctAnswer": { "type": "number" }
+            }
+          }
+        },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      }
+    },
+    "QuizAttempt": {
+      "title": "Quiz Attempt",
+      "description": "User results for a specific quiz",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "quizId": { "type": "string" },
+        "score": { "type": "number" },
+        "pointsEarned": { "type": "number" },
+        "completedAt": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/quizzes/{quizId}": {
+      "schema": "Quiz",
+      "description": "Quiz definitions"
+    },
+    "/users/{userId}/quiz_attempts/{quizId}": {
+      "schema": "QuizAttempt",
+      "description": "User quiz completion records"
+    },
+    "/support_chats/{chatId}": {
+      "schema": "SupportChat",
+      "description": "Active support chat metadata"
+    },
+    "/support_chats/{chatId}/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Historical messages for a support chat"
+    },
+    "/banners/{bannerId}": {
+      "schema": "Banner",
+      "description": "Active and inactive promotional banners"
+    },
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Definitions of available tasks"
+    },
+    "/users/{userId}/tasks/{taskId}": {
+      "schema": "UserTask",
+      "description": "User specific task status and progress"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/earnings/{earningId}": {
+      "schema": "Earning",
+      "description": "Log of all point-earning events"
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": "Withdrawal",
+      "description": "Withdrawal requests"
+    },
+    "/admins/{adminId}": {
+      "schema": "object",
+      "description": "Collection of admin user IDs"
+    },
+    "/settings/global": {
+      "schema": "AppSetting",
+      "description": "Global app settings"
+    }
+  }
+}
