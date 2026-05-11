@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useSearchParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/AuthContext';
+import { LanguageProvider } from './lib/LanguageContext';
 import { signOut } from 'firebase/auth';
 import { auth } from './lib/firebase';
 import { ShieldAlert } from 'lucide-react';
@@ -34,6 +35,7 @@ import QuizPlayer from './pages/QuizPlayer';
 import LuckyWheel from './pages/LuckyWheel';
 import AdminSupport from './pages/admin/Support';
 import SupportChatPage from './pages/SupportChat';
+import InfoPage from './pages/InfoPage';
 
 function ReferralTracker() {
   const [searchParams] = useSearchParams();
@@ -93,52 +95,55 @@ function PermissionRoute({ permission, children }: { permission: AdminPermission
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <ReferralTracker />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          
-          {/* User Routes */}
-          <Route path="/" element={
-            <PrivateRoute>
-              <Layout />
-            </PrivateRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="quizzes" element={<Quizzes />} />
-            <Route path="quiz/:id" element={<QuizPlayer />} />
-            <Route path="wheel" element={<LuckyWheel />} />
-            <Route path="rewards" element={<Rewards />} />
-            <Route path="tasks" element={<Tasks />} />
-            <Route path="refer" element={<Refer />} />
-            <Route path="account" element={<Account />} />
-            <Route path="support" element={<Support />} />
-            <Route path="support/chat" element={<SupportChatPage />} />
-            <Route path="terms" element={<Terms />} />
-            <Route path="history" element={<History />} />
-            <Route path="withdraw" element={<Withdraw />} />
-          </Route>
-
-          {/* Admin Routes */}
-          <Route element={<AdminGuard />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="users" element={<PermissionRoute permission="manage_users"><AdminUsers /></PermissionRoute>} />
-              <Route path="withdrawals" element={<PermissionRoute permission="manage_withdrawals"><AdminWithdrawals /></PermissionRoute>} />
-              <Route path="admins" element={<PermissionRoute permission="manage_admins"><AdminAdmins /></PermissionRoute>} />
-              <Route path="quizzes" element={<PermissionRoute permission="manage_tasks"><AdminQuizzes /></PermissionRoute>} />
-              <Route path="wheel" element={<PermissionRoute permission="manage_settings"><AdminLuckyWheel /></PermissionRoute>} />
-              <Route path="banners" element={<PermissionRoute permission="manage_banners"><AdminBanners /></PermissionRoute>} />
-              <Route path="tasks" element={<PermissionRoute permission="manage_tasks"><AdminTasks /></PermissionRoute>} />
-              <Route path="reward-shop" element={<PermissionRoute permission="manage_tasks"><AdminRewardTasks /></PermissionRoute>} />
-              <Route path="support" element={<PermissionRoute permission="manage_support"><AdminSupport /></PermissionRoute>} />
-              <Route path="settings" element={<PermissionRoute permission="manage_settings"><AdminSettings /></PermissionRoute>} />
-              <Route path="referrals" element={<PermissionRoute permission="manage_settings"><AdminReferrals /></PermissionRoute>} />
-              <Route path="ip-detect" element={<PermissionRoute permission="manage_users"><AdminIpDetection /></PermissionRoute>} />
+      <LanguageProvider>
+        <Router>
+          <ReferralTracker />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            
+            {/* User Routes */}
+            <Route path="/" element={
+              <PrivateRoute>
+                <Layout />
+              </PrivateRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="quizzes" element={<Quizzes />} />
+              <Route path="quiz/:id" element={<QuizPlayer />} />
+              <Route path="wheel" element={<LuckyWheel />} />
+              <Route path="rewards" element={<Rewards />} />
+              <Route path="tasks" element={<Tasks />} />
+              <Route path="refer" element={<Refer />} />
+              <Route path="account" element={<Account />} />
+              <Route path="support" element={<Support />} />
+              <Route path="support/chat" element={<SupportChatPage />} />
+              <Route path="terms" element={<Terms />} />
+              <Route path="history" element={<History />} />
+              <Route path="withdraw" element={<Withdraw />} />
+              <Route path="info/:pageId" element={<InfoPage />} />
             </Route>
-          </Route>
-        </Routes>
-      </Router>
+  
+            {/* Admin Routes */}
+            <Route element={<AdminGuard />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<PermissionRoute permission="manage_users"><AdminUsers /></PermissionRoute>} />
+                <Route path="withdrawals" element={<PermissionRoute permission="manage_withdrawals"><AdminWithdrawals /></PermissionRoute>} />
+                <Route path="admins" element={<PermissionRoute permission="manage_admins"><AdminAdmins /></PermissionRoute>} />
+                <Route path="quizzes" element={<PermissionRoute permission="manage_tasks"><AdminQuizzes /></PermissionRoute>} />
+                <Route path="wheel" element={<PermissionRoute permission="manage_settings"><AdminLuckyWheel /></PermissionRoute>} />
+                <Route path="banners" element={<PermissionRoute permission="manage_banners"><AdminBanners /></PermissionRoute>} />
+                <Route path="tasks" element={<PermissionRoute permission="manage_tasks"><AdminTasks /></PermissionRoute>} />
+                <Route path="reward-shop" element={<PermissionRoute permission="manage_tasks"><AdminRewardTasks /></PermissionRoute>} />
+                <Route path="support" element={<PermissionRoute permission="manage_support"><AdminSupport /></PermissionRoute>} />
+                <Route path="settings" element={<PermissionRoute permission="manage_settings"><AdminSettings /></PermissionRoute>} />
+                <Route path="referrals" element={<PermissionRoute permission="manage_settings"><AdminReferrals /></PermissionRoute>} />
+                <Route path="ip-detect" element={<PermissionRoute permission="manage_users"><AdminIpDetection /></PermissionRoute>} />
+              </Route>
+            </Route>
+          </Routes>
+        </Router>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

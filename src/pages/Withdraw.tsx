@@ -19,8 +19,11 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { AppSettings } from '../types';
 
+import { useLanguage } from '../lib/LanguageContext';
+
 export default function Withdraw() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [method, setMethod] = useState('');
   const [amount, setAmount] = useState<number>(500); // Default to min
@@ -78,29 +81,29 @@ export default function Withdraw() {
     if (!profile?.uid || !settings) return;
 
     if (profile.withdrawalsDisabled) {
-      setError('Withdrawals are temporarily disabled for your account. Please contact support.');
+      setError(t('withdrawals_disabled'));
       return;
     }
 
     if (amount < minWithdrawal) {
-      setError(`Minimum withdrawal is ${minWithdrawal} points`);
+      setError(`${t('min_withdrawal_error')} ${minWithdrawal} ${t('points')}`);
       return;
     }
     if (profile.points < amount) {
-      setError('Insufficient points');
+      setError(t('insufficient_points'));
       return;
     }
 
     let finalDetails = details;
     if (method === 'Bank Transfer') {
       if (!bankDetails.bankName || !bankDetails.accountNumber || !bankDetails.accountName) {
-        setError('Please fill required bank details');
+        setError(t('fill_bank_details'));
         return;
       }
       finalDetails = `Bank: ${bankDetails.bankName}, A/C: ${bankDetails.accountName}, No: ${bankDetails.accountNumber}, Branch: ${bankDetails.branchName}, Routing: ${bankDetails.routingNumber}`;
     } else {
       if (!method || !details) {
-        setError('Please fill all fields');
+        setError(t('fill_all_fields'));
         return;
       }
     }
@@ -113,7 +116,7 @@ export default function Withdraw() {
       setSuccess(true);
       setTimeout(() => navigate('/history'), 2000);
     } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+      setError(err.message || t('something_wrong'));
     } finally {
       setIsSubmitting(false);
     }
@@ -197,14 +200,14 @@ export default function Withdraw() {
           <CheckCircle2 className="w-12 h-12" />
         </motion.div>
         <div>
-          <h2 className="text-2xl font-black text-zinc-900">Request Submitted!</h2>
-          <p className="text-zinc-500 mt-2">Your withdrawal request is being processed. It usually takes 24-48 hours to approve.</p>
+          <h2 className="text-2xl font-black text-zinc-900">{t('req_submitted')}</h2>
+          <p className="text-zinc-500 mt-2">{t('req_processing_desc')}</p>
         </div>
         <button 
           onClick={() => navigate('/history')}
           className="bg-zinc-900 text-white px-8 py-3 rounded-2xl font-bold"
         >
-          View History
+          {t('view_history')}
         </button>
       </div>
     );
@@ -230,7 +233,7 @@ export default function Withdraw() {
                   <Bell className="w-6 h-6 animate-bounce" />
                </div>
                <div className="text-left pr-6">
-                  <h3 className="font-black text-amber-900 text-sm uppercase tracking-tight">Withdrawal Notice</h3>
+                  <h3 className="font-black text-amber-900 text-sm uppercase tracking-tight">{t('withdrawal_notice')}</h3>
                   <p className="text-[11px] font-bold text-amber-800/70 mt-1 leading-relaxed whitespace-pre-line">
                     {settings.withdrawalNotice}
                   </p>
@@ -242,10 +245,10 @@ export default function Withdraw() {
 
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Withdrawal Center</h2>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">{t('withdrawal_center')}</h2>
           <p className="text-slate-500 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
             <RefreshCcw className="w-3 h-3 text-indigo-500" />
-            24-48h Approval Window
+            {t('payout_time_window')}
           </p>
         </div>
         <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 border border-indigo-100 shadow-sm">
@@ -255,10 +258,10 @@ export default function Withdraw() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-slate-100 flex flex-col justify-center">
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Current Balance</p>
+          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">{t('current_balance')}</p>
           <div className="flex items-baseline gap-2">
               <span className="text-4xl font-black text-slate-800 tracking-tighter">{profile?.points || 0}</span>
-              <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">Points</span>
+              <span className="text-slate-400 font-bold text-xs uppercase tracking-widest">{t('points')}</span>
           </div>
           <div className="mt-3 flex items-center gap-2">
              <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
@@ -274,7 +277,7 @@ export default function Withdraw() {
            </div>
            <div className="relative z-10 space-y-4">
               <div className="flex items-center justify-between">
-                 <h3 className="text-sm font-black uppercase tracking-widest text-indigo-200">Point Converter</h3>
+                 <h3 className="text-sm font-black uppercase tracking-widest text-indigo-200">{t('point_converter')}</h3>
                  <div className="flex bg-white/20 p-1 rounded-xl backdrop-blur-sm">
                     <button 
                       onClick={() => setTargetCurrency('BDT')}
@@ -305,7 +308,7 @@ export default function Withdraw() {
                  </div>
               </div>
               <p className="text-[10px] font-bold text-indigo-200/80 italic text-center px-4">
-                Rate: {targetCurrency === 'BDT' ? 
+                {t('rate')}: {targetCurrency === 'BDT' ? 
                   `${settings?.pointsPerBdt || 1} Pts = ৳1 BDT` : 
                   `${settings?.pointsPerUsd || settings?.conversionRate || 100} Pts = $1 USD`}
               </p>
@@ -316,7 +319,7 @@ export default function Withdraw() {
       <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div className="space-y-4">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
-            Select Payout Destination
+            {t('select_payout')}
           </label>
           <div className="grid grid-cols-3 gap-3">
             {paymentMethods.map((pm) => (
@@ -340,7 +343,7 @@ export default function Withdraw() {
 
         <div className="grid grid-cols-1 gap-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Points to Burn</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{t('points_to_burn')}</label>
             <div className="relative">
               <input 
                 type="number" 
@@ -350,7 +353,7 @@ export default function Withdraw() {
                 placeholder={String(minWithdrawal)}
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-white px-3 py-1 rounded-lg border border-slate-100 shadow-sm">
-                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">MIN: {minWithdrawal}</span>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t('min')}: {minWithdrawal}</span>
               </div>
             </div>
           </div>
@@ -380,7 +383,7 @@ export default function Withdraw() {
             <RefreshCcw className="w-5 h-5 animate-spin" />
           ) : (
             <>
-              Confirm Withdrawal
+              {t('confirm_withdrawal')}
               <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center group-hover:translate-x-1 transition-transform">
                  <ArrowRight className="w-5 h-5" />
               </div>
@@ -397,11 +400,9 @@ export default function Withdraw() {
            <Info className="w-5 h-5 text-indigo-400" />
         </div>
         <div className="relative z-10">
-           <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-1">Compliance & Security</h4>
+           <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-1">{t('compliance_security')}</h4>
            <p className="text-[10px] text-zinc-400 leading-relaxed font-bold italic">
-             All withdrawal requests undergo systematic fraud checks via IP Detection and Network Analysis. 
-             Providing false account details may result in permanent forfeiture of accumulated points. 
-             Please ensure your payout method is active and verified before requesting funds.
+             {t('compliance_desc')}
            </p>
         </div>
       </div>

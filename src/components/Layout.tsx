@@ -18,9 +18,12 @@ import {
   ShieldCheck,
   ChevronLeft,
   Smartphone,
-  Download
+  Download,
+  MoreVertical,
+  Info as InfoIcon
 } from 'lucide-react';
 import { useAuth } from '../lib/AuthContext';
+import { useLanguage } from '../lib/LanguageContext';
 import { getAppSettings } from '../lib/dataService';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -28,8 +31,10 @@ import { AppSettings } from '../types';
 import BackButton from './BackButton';
 
 export default function Layout() {
+  const { locale, t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
@@ -46,12 +51,12 @@ export default function Layout() {
   const isHome = location.pathname === '/';
 
   const menuItems = [
-    { name: 'Home', icon: Home, path: '/' },
-    { name: 'Earning Tasks', icon: ShieldCheck, path: '/tasks' },
-    { name: 'Reward Shop', icon: Gift, path: '/rewards' },
-    { name: 'Referral', icon: Users, path: '/refer' },
-    { name: 'Support', icon: HelpCircle, path: '/support' },
-    { name: 'Terms', icon: FileText, path: '/terms' },
+    { name: t('home'), icon: Home, path: '/' },
+    { name: t('earning_tasks'), icon: ShieldCheck, path: '/tasks' },
+    { name: t('reward_shop'), icon: Gift, path: '/rewards' },
+    { name: t('refer'), icon: Users, path: '/refer' },
+    { name: t('support'), icon: HelpCircle, path: '/support' },
+    { name: t('terms_of_use'), icon: FileText, path: '/terms' },
   ];
 
   const handleLogout = async () => {
@@ -84,13 +89,59 @@ export default function Layout() {
           <span className="font-bold text-xl tracking-tight">PointHub</span>
         </div>
 
-        <button 
-          onClick={() => setIsProfileOpen(true)}
-          className="flex items-center gap-3 text-white cursor-pointer hover:bg-indigo-600 p-1 px-2 rounded-lg transition-colors"
-        >
+        <div className="flex items-center gap-2">
+          {/* Three-dot dropdown */}
+          <div className="relative">
+            <button 
+              onClick={() => setIsMoreOpen(!isMoreOpen)}
+              className="p-2 hover:bg-indigo-600 rounded-md transition-colors text-white"
+            >
+              <MoreVertical className="w-5 h-5" />
+            </button>
+            <AnimatePresence>
+              {isMoreOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsMoreOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden"
+                  >
+                    <div className="p-2">
+                      {[
+                        { label: t('jobs_tasks'), path: '/info/jobs', icon: Gift },
+                        { label: t('our_network'), path: '/info/network', icon: Users },
+                        { label: t('payout_info'), path: '/info/payouts', icon: Wallet },
+                        { label: t('support_info'), path: '/info/support', icon: HelpCircle },
+                        { label: t('terms_of_use'), path: '/info/terms', icon: FileText },
+                      ].map((item) => (
+                        <button
+                          key={item.path}
+                          onClick={() => {
+                            navigate(item.path);
+                            setIsMoreOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 text-slate-600 font-bold text-xs rounded-xl transition-colors"
+                        >
+                          <item.icon className="w-4 h-4 text-indigo-500" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button 
+            onClick={() => setIsProfileOpen(true)}
+            className="flex items-center gap-3 text-white cursor-pointer hover:bg-indigo-600 p-1 px-2 rounded-lg transition-colors"
+          >
           <div className="text-right hidden sm:block">
-            <p className="text-[10px] opacity-80 uppercase font-bold tracking-wider">Welcome back,</p>
-            <p className="text-sm font-semibold leading-tight">{profile?.name || 'User'}</p>
+            <p className="text-[10px] opacity-80 uppercase font-bold tracking-wider">{t('welcome_back')}</p>
+            <p className="text-sm font-semibold leading-tight">{profile?.name || t('account')}</p>
           </div>
           <div className="w-9 h-9 rounded-full bg-indigo-300 border-2 border-white flex items-center justify-center text-indigo-800 font-bold shadow-sm overflow-hidden shrink-0">
             {profile?.profilePic ? (
@@ -100,6 +151,7 @@ export default function Layout() {
             )}
           </div>
         </button>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -109,10 +161,10 @@ export default function Layout() {
 
       {/* Bottom Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 flex items-center shrink-0 z-30 max-w-4xl mx-auto">
-        <NavButton to="/" icon={Home} label="Dashboard" />
-        <NavButton to="/tasks" icon={Gift} label="Tasks" />
-        <NavButton to="/refer" icon={Users} label="Referral" />
-        <NavButton to="/account" icon={Settings} label="Settings" />
+        <NavButton to="/" icon={Home} label={t('home')} />
+        <NavButton to="/tasks" icon={Gift} label={t('tasks')} />
+        <NavButton to="/refer" icon={Users} label={t('refer')} />
+        <NavButton to="/account" icon={Settings} label={t('account')} />
       </nav>
 
       {/* Side Menu Drawer */}
@@ -134,7 +186,7 @@ export default function Layout() {
               className="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 shadow-2xl flex flex-col"
             >
               <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
-                <span className="font-bold text-xl text-emerald-600">Menu</span>
+                <span className="font-bold text-xl text-emerald-600">{t('menu')}</span>
                 <button onClick={() => setIsMenuOpen(false)}>
                   <X className="w-6 h-6 text-zinc-400" />
                 </button>
@@ -167,12 +219,12 @@ export default function Layout() {
                         <Smartphone className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="font-black text-sm uppercase tracking-wider">Official App</h4>
-                        <p className="text-indigo-100 text-[10px] font-medium leading-relaxed mt-1">Download our native application for faster access and exclusive rewards.</p>
+                        <h4 className="font-black text-sm uppercase tracking-wider">{t('official_app')}</h4>
+                        <p className="text-indigo-100 text-[10px] font-medium leading-relaxed mt-1">{t('app_desc')}</p>
                       </div>
                       <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest mt-2 border-t border-white/10 pt-3">
                          <Download className="w-3 h-3" />
-                         Download Now
+                         {t('download_now')}
                       </div>
                     </a>
                   </div>
@@ -184,7 +236,7 @@ export default function Layout() {
                   className="flex items-center gap-4 text-rose-600 font-medium w-full"
                 >
                   <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
+                  <span>{t('logout')}</span>
                 </button>
               </div>
             </motion.div>
@@ -211,7 +263,7 @@ export default function Layout() {
               className="fixed top-0 right-0 bottom-0 w-80 bg-white z-50 shadow-2xl flex flex-col"
             >
               <div className="p-6 border-b border-zinc-100 flex items-center justify-between">
-                <span className="font-bold text-xl text-emerald-600">Profile</span>
+                <span className="font-bold text-xl text-emerald-600">{t('profile')}</span>
                 <button onClick={() => setIsProfileOpen(false)}>
                   <X className="w-6 h-6 text-zinc-400" />
                 </button>
@@ -232,20 +284,20 @@ export default function Layout() {
                 
                 <div className="grid grid-cols-2 gap-4 w-full">
                   <div className="bg-emerald-50 p-3 rounded-2xl text-center">
-                    <p className="text-xs text-emerald-600 font-medium uppercase tracking-wider mb-1">Points</p>
+                    <p className="text-xs text-emerald-600 font-medium uppercase tracking-wider mb-1">{t('points')}</p>
                     <p className="text-lg font-bold text-emerald-700">{profile?.points}</p>
                   </div>
                   <div className="bg-amber-50 p-3 rounded-2xl text-center">
-                    <p className="text-xs text-amber-600 font-medium uppercase tracking-wider mb-1">Total</p>
+                    <p className="text-xs text-amber-600 font-medium uppercase tracking-wider mb-1">{t('total')}</p>
                     <p className="text-lg font-bold text-amber-700">${((profile?.totalEarnings || 0) / (settings?.pointsPerUsd || settings?.conversionRate || 100)).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
 
               <div className="flex-1 py-4 px-2">
-                <ProfileLink to="/withdraw" icon={Wallet} label="Withdraw" onClick={() => setIsProfileOpen(false)} />
-                <ProfileLink to="/history" icon={HistoryIcon} label="History" onClick={() => setIsProfileOpen(false)} />
-                <ProfileLink to="/account" icon={Settings} label="Settings" onClick={() => setIsProfileOpen(false)} />
+                <ProfileLink to="/withdraw" icon={Wallet} label={t('withdraw')} onClick={() => setIsProfileOpen(false)} />
+                <ProfileLink to="/history" icon={HistoryIcon} label={t('history')} onClick={() => setIsProfileOpen(false)} />
+                <ProfileLink to="/account" icon={Settings} label={t('account')} onClick={() => setIsProfileOpen(false)} />
               </div>
 
               <div className="p-6 text-center text-xs text-zinc-400">

@@ -27,8 +27,11 @@ import { cn } from '../lib/utils';
 import BannerSlider from '../components/BannerSlider';
 import { AppSettings } from '../types';
 
+import { useLanguage } from '../lib/LanguageContext';
+
 export default function Dashboard() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInMsg, setCheckInMsg] = useState<string | null>(null);
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -45,10 +48,10 @@ export default function Dashboard() {
     setCheckingIn(true);
     try {
       const bonus = await processDailyCheckIn(profile.uid);
-      if (bonus) {
-        setCheckInMsg(`Claimed ${bonus} bonus points!`);
+          if (bonus) {
+        setCheckInMsg(`${t('claimed')} ${bonus} ${t('points')}!`);
       } else {
-        setCheckInMsg('Already checked in today.');
+        setCheckInMsg(`${t('daily_bonus')} ${t('done')}`);
       }
       setTimeout(() => setCheckInMsg(null), 3000);
     } catch (err) {
@@ -67,7 +70,7 @@ export default function Dashboard() {
         <div className="bg-indigo-600 overflow-hidden py-2 rounded-xl shadow-lg shadow-indigo-100 flex items-center">
           <div className="flex items-center gap-2 px-4 border-r border-indigo-400 shrink-0">
              <Megaphone className="w-4 h-4 text-white animate-bounce" />
-             <span className="text-[10px] font-black text-indigo-100 uppercase tracking-widest">News</span>
+             <span className="text-[10px] font-black text-indigo-100 uppercase tracking-widest">{t('news')}</span>
           </div>
           <div className="flex-1 overflow-hidden">
              <motion.p 
@@ -84,30 +87,30 @@ export default function Dashboard() {
       {/* Top Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-indigo-500">
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Balance</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{t('balance')}</p>
           <div className="flex items-baseline gap-1">
             <p className="text-2xl font-black text-indigo-700">{profile?.points || 0}</p>
-            <span className="text-[10px] font-medium text-slate-400">pts</span>
+            <span className="text-[10px] font-medium text-slate-400">{t('points')}</span>
           </div>
           <p className="text-[10px] text-slate-400 mt-0.5">≈ ${((profile?.points || 0) / (settings?.pointsPerUsd || settings?.conversionRate || 100)).toFixed(2)} USD</p>
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-emerald-500">
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Earnings</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{t('earnings')}</p>
           <div className="flex items-baseline gap-1">
             <p className="text-2xl font-black text-emerald-600">+{profile?.totalEarnings || 0}</p>
-            <span className="text-[10px] font-medium text-slate-400">pts</span>
+            <span className="text-[10px] font-medium text-slate-400">{t('points')}</span>
           </div>
           <p className="text-[10px] text-slate-400 mt-0.5">≈ ৳{((profile?.totalEarnings || 0) / (settings?.pointsPerBdt || 1)).toFixed(2)} BDT</p>
         </div>
 
         <div className="bg-white rounded-xl p-4 shadow-sm border-l-4 border-orange-500">
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Referrals</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{t('refer')}</p>
           <div className="flex items-baseline gap-1">
             <p className="text-2xl font-black text-orange-600">{(profile?.referralCountL1 || 0) + (profile?.referralCountL2 || 0)}</p>
-            <span className="text-[10px] font-medium text-slate-400">Total</span>
+            <span className="text-[10px] font-medium text-slate-400">{t('total')}</span>
           </div>
-          <p className="text-[10px] text-slate-400 mt-0.5">L1 & L2 Network</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">{t('l1_l2_network')}</p>
         </div>
       </div>
 
@@ -118,8 +121,8 @@ export default function Dashboard() {
             <Calendar className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800 text-sm">Daily Check-in</h3>
-            <p className="text-slate-400 text-[10px] font-medium uppercase">Earn extra pts daily</p>
+            <h3 className="font-bold text-slate-800 text-sm">{t('daily_checkin')}</h3>
+            <p className="text-slate-400 text-[10px] font-medium uppercase">{t('earn_extra_pts')}</p>
           </div>
         </div>
         <button 
@@ -127,7 +130,7 @@ export default function Dashboard() {
           disabled={checkingIn}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50"
         >
-          {checkingIn ? '...' : (checkInMsg || 'Claim')}
+          {checkingIn ? '...' : (checkInMsg || t('claim'))}
         </button>
       </div>
 
@@ -140,12 +143,12 @@ export default function Dashboard() {
           className="block w-full bg-slate-100 rounded-xl overflow-hidden border-2 border-indigo-50/50 hover:border-indigo-200 transition-colors"
         >
            <div className="py-8 px-6 bg-gradient-to-r from-slate-900 to-indigo-950 flex flex-col items-center justify-center text-center gap-2 group">
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full">Sponsored Result</span>
-              <h4 className="text-white font-black text-lg tracking-tight group-hover:scale-105 transition-transform">Get Exclusive Rewards Now!</h4>
-              <p className="text-slate-400 text-[10px] font-bold uppercase mt-1">Click to reveal special bonus code</p>
+              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full">{t('sponsored')}</span>
+              <h4 className="text-white font-black text-lg tracking-tight group-hover:scale-105 transition-transform">{t('get_rewards_now')}</h4>
+              <p className="text-slate-400 text-[10px] font-bold uppercase mt-1">{t('click_reveal')}</p>
               <div className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                  <ExternalLink className="w-3 h-3" />
-                 Visit Offer
+                 {t('visit_offer')}
               </div>
            </div>
         </a>
@@ -155,33 +158,33 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <ActionCard 
           icon={Puzzle} 
-          title="Daily Quiz" 
-          desc="Test your knowledge and earn rewards" 
-          badge="Interactive"
+          title={t('daily_quiz')} 
+          desc={t('quiz_desc')} 
+          badge={t('interactive')}
           path="/quizzes"
           isIndigo
         />
         <ActionCard 
           icon={Gift} 
-          title="Task Center" 
-          desc="Visit sites and watch videos" 
-          badge="HOT"
+          title={t('task_center')} 
+          desc={t('task_center_desc')} 
+          badge={t('hot')}
           path="/tasks"
           isEmerald
         />
         <ActionCard 
           icon={RotateCw} 
-          title="Lucky Wheel" 
-          desc="Spin to win up to 500 points" 
-          badge="LUCKY"
+          title={t('spin_wheel')} 
+          desc={t('spin_desc')} 
+          badge={t('lucky')}
           path="/wheel"
           isOrange
         />
         <ActionCard 
           icon={Share2} 
-          title="Refer & Earn" 
-          desc="Get 10% of their earnings" 
-          badge="POPULAR"
+          title={t('refer_earn')} 
+          desc={t('refer_earn_desc')} 
+          badge={t('popular')}
           path="/refer"
           isIndigo
           isGradient
@@ -193,10 +196,10 @@ export default function Dashboard() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-indigo-400 mb-2">
             <TrendingUp className="w-5 h-5" />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Growth Program</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">{t('growth_program')}</span>
           </div>
-          <h4 className="text-xl font-bold mb-1">Invite & Earn 500 Points</h4>
-          <p className="text-slate-400 text-xs">Share your code with friends and get bonus.</p>
+          <h4 className="text-xl font-bold mb-1">{t('invite_earn_title')}</h4>
+          <p className="text-slate-400 text-xs">{t('invite_earn_desc')}.</p>
         </div>
         <div className="absolute right-[-20px] bottom-[-20px] opacity-10 rotate-12 transition-transform group-hover:scale-110">
             <Target className="w-40 h-40" />
@@ -211,6 +214,7 @@ export default function Dashboard() {
 }
 
 function DashboardFooter({ settings }: { settings: AppSettings | null }) {
+  const { t } = useLanguage();
   return (
     <footer className="mt-12 space-y-8 bg-white/50 rounded-3xl p-6 border border-slate-100 pb-20">
        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -235,25 +239,19 @@ function DashboardFooter({ settings }: { settings: AppSettings | null }) {
 
           <div className="grid grid-cols-2 gap-4">
              <div className="space-y-4">
-                <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Platform</h5>
+                <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('platform')}</h5>
                 <div className="flex flex-col gap-3">
-                   <FooterLink to="/tasks" icon={Gift} label="Jobs" />
-                   <FooterLink to="/refer" icon={Share2} label="Network" />
-                   <FooterLink to="/withdraw" icon={CreditCard} label="Payouts" />
+                   <FooterLink to="/info/jobs" icon={Gift} label={t('jobs_tasks')} />
+                   <FooterLink to="/info/network" icon={Share2} label={t('our_network')} />
+                   <FooterLink to="/info/payouts" icon={CreditCard} label={t('payout_info')} />
                 </div>
              </div>
              <div className="space-y-4">
-                <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Governance</h5>
+                <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">{t('governance')}</h5>
                 <div className="flex flex-col gap-3">
-                   <button onClick={() => alert(settings?.termsAndConditions || 'Terms not updated')} className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors text-[11px] font-bold">
-                      <FileText className="w-3.5 h-3.5" />
-                      Terms of Use
-                   </button>
-                   <button onClick={() => alert(settings?.privacyPolicy || 'Privacy policy not updated')} className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors text-[11px] font-bold">
-                      <Shield className="w-3.5 h-3.5" />
-                      Privacy Shield
-                   </button>
-                   <FooterLink to="/support" icon={Settings} label="Support" />
+                   <FooterLink to="/info/terms" icon={FileText} label={t('terms_of_use')} />
+                   <FooterLink to="/info/privacy" icon={Shield} label={t('privacy_shield')} />
+                   <FooterLink to="/info/support" icon={Settings} label={t('support_info')} />
                 </div>
              </div>
           </div>
@@ -261,7 +259,7 @@ function DashboardFooter({ settings }: { settings: AppSettings | null }) {
 
        <div className="pt-8 border-t border-slate-100 text-center">
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em]">
-             &copy; {new Date().getFullYear()} Pointhub System &bull; All Rights Reserved
+             &copy; {new Date().getFullYear()} Pointhub System &bull; {t('rights_reserved')}
           </p>
        </div>
     </footer>

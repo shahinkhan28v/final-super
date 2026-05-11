@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../lib/AuthContext';
+import { useLanguage } from '../lib/LanguageContext';
 import { getUserEarnings } from '../lib/dataService';
 import { EarningLog, WithdrawalRequest } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -18,6 +19,7 @@ import { db } from '../lib/firebase';
 
 export default function History() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<'earnings' | 'withdrawals'>('earnings');
   const [earnings, setEarnings] = useState<EarningLog[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
@@ -54,7 +56,7 @@ export default function History() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-slate-800 tracking-tight">Transaction History</h2>
+      <h2 className="text-xl font-bold text-slate-800 tracking-tight">{t('history')}</h2>
 
       {/* Tabs */}
       <div className="bg-slate-100 p-1.5 rounded-xl border border-slate-200 flex shadow-inner">
@@ -65,7 +67,7 @@ export default function History() {
             activeTab === 'earnings' ? "bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200" : "text-slate-400"
           )}
         >
-          Earnings
+          {t('earnings')}
         </button>
         <button 
           onClick={() => setActiveTab('withdrawals')}
@@ -74,7 +76,7 @@ export default function History() {
             activeTab === 'withdrawals' ? "bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200" : "text-slate-400"
           )}
         >
-          Withdrawals
+          {t('withdrawal_history')}
         </button>
       </div>
 
@@ -82,7 +84,7 @@ export default function History() {
         {loading ? (
           <div className="flex flex-col items-center justify-center pt-20 gap-3">
              <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Querying Records...</p>
+             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{t('loading')}...</p>
           </div>
         ) : (
           <AnimatePresence mode="wait">

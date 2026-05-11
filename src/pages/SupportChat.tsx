@@ -12,7 +12,8 @@ import {
   AlertCircle,
   Hash,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -31,7 +32,9 @@ export default function SupportChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -82,16 +85,40 @@ export default function SupportChatPage() {
     });
   };
 
-  const handleSendImage = async () => {
-    const url = prompt('Enter image URL:');
-    if (!url || !chat?.id || !profile) return;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !chat?.id || !profile) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File too large (max 2MB)');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        await sendChatMessage(chat.id!, {
+          senderId: profile.uid,
+          senderRole: 'user',
+          text: '',
+          imageUrl: base64
+        });
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error(err);
+      setIsUploading(false);
+    }
     
-    await sendChatMessage(chat.id, {
-      senderId: profile.uid,
-      senderRole: 'user',
-      text: '',
-      imageUrl: url
-    });
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const PRESET_MESSAGES = [
@@ -200,7 +227,8 @@ export default function SupportChatPage() {
                           src={msg.imageUrl} 
                           alt="Attachment" 
                           referrerPolicy="no-referrer"
-                          className="max-w-full rounded-xl mt-2 border border-black/5" 
+                          className="max-w-full rounded-xl mt-2 border border-black/5 cursor-pointer transition-transform active:scale-[0.98]" 
+                          onClick={() => window.open(msg.imageUrl, '_blank')}
                         />
                       )}
                       <div className={cn(
@@ -255,12 +283,20 @@ export default function SupportChatPage() {
                      />
                   </div>
                   <div className="flex gap-1.5 pb-1">
+                     <input 
+                        type="file"
+                        hidden
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                     />
                      <button 
                        type="button"
-                       onClick={handleSendImage}
+                       disabled={isUploading}
+                       onClick={() => fileInputRef.current?.click()}
                        className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-slate-100 transition-colors"
                      >
-                       <ImageIcon className="w-5 h-5" />
+                       {isUploading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
                      </button>
                      <button 
                        type="submit"

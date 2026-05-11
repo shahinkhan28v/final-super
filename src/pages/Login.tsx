@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
+import { useLanguage } from '../lib/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Gift, Wallet, TrendingUp, ShieldCheck, AlertCircle, Mail, Lock, User, Eye, EyeOff, ArrowRight, CheckCircle2 } from 'lucide-react';
 
@@ -9,6 +10,7 @@ type EmailMode = 'signin' | 'signup';
 
 export default function Login() {
   const { user, signIn, signInRedirect, signInEmail, signUpEmail, loading, authError } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [method, setMethod] = useState<LoginMethod>('google');
   const [emailMode, setEmailMode] = useState<EmailMode>('signin');
@@ -103,7 +105,7 @@ export default function Login() {
           PointHub
         </h1>
         <p className="text-slate-500 font-medium mb-8 text-xs">
-          Join 50,000+ users earning real rewards daily. Complete simple tasks and withdraw instantly.
+          {t('login_subtitle')}
         </p>
 
         {/* MLM Referral Input */}
@@ -196,14 +198,14 @@ export default function Login() {
                   onClick={() => setEmailMode('signin')}
                   className={`flex-1 py-1.5 rounded-md text-[9px] font-bold uppercase ${emailMode === 'signin' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
                 >
-                  Sign In
+                  {t('signin_btn')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEmailMode('signup')}
                   className={`flex-1 py-1.5 rounded-md text-[9px] font-bold uppercase ${emailMode === 'signup' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400'}`}
                 >
-                  Create Account
+                  {t('join_now')}
                 </button>
               </div>
 

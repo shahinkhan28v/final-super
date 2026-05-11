@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../lib/AuthContext';
+import { useLanguage } from '../lib/LanguageContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, 
@@ -25,6 +26,7 @@ interface ReferralWithBonus extends UserProfile {
 
 export default function Refer() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -87,8 +89,8 @@ export default function Refer() {
   return (
     <div className="space-y-6 pb-20 max-w-lg mx-auto">
       <div className="text-center space-y-1 mb-8 pt-4">
-        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Refer & Earn</h2>
-        <p className="text-slate-500 text-sm font-medium">Build your network and earn passive income!</p>
+        <h2 className="text-3xl font-black text-slate-900 tracking-tight">{t('refer_earn')}</h2>
+        <p className="text-slate-500 text-sm font-medium">{t('refer_earn_desc')}</p>
       </div>
 
       {/* MLM Stats Overview */}
@@ -128,7 +130,7 @@ export default function Refer() {
         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
            <Gift className="w-12 h-12 text-indigo-600" />
         </div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Your Referral Code</p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">{t('my_referral_code')}</p>
         <div className="flex items-center gap-4">
            <div className="bg-indigo-50 px-8 py-4 rounded-3xl border-2 border-indigo-100">
               <code className="text-4xl font-black tracking-[0.2em] text-indigo-700">{profile?.referralCode || '------'}</code>
@@ -137,7 +139,7 @@ export default function Refer() {
              onClick={handleCopyCode}
              className="w-14 h-14 bg-indigo-600 text-white rounded-[1.5rem] flex items-center justify-center shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-90 transition-all"
            >
-             {copiedCode ? <Check className="w-6 h-6" /> : <Copy className="w-6 h-6" />}
+             {copiedCode ? t('copied') : t('copy_code')}
            </button>
         </div>
         {copiedCode && (

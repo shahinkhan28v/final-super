@@ -21,8 +21,11 @@ import { Task, UserTask, TaskStatus, AppSettings } from '../types';
 import { cn, openExternalLink } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { useLanguage } from '../lib/LanguageContext';
+
 export default function TaskList() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [userTasks, setUserTasks] = useState<UserTask[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,7 +133,7 @@ const getTypeIcon = (type: string) => {
   if (loading) return (
     <div className="py-20 flex flex-col items-center gap-4 text-slate-400">
       <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-[10px] font-black uppercase tracking-widest">Loading Rewards...</p>
+      <p className="text-[10px] font-black uppercase tracking-widest">{t('loading')}...</p>
     </div>
   );
 
@@ -138,8 +141,8 @@ const getTypeIcon = (type: string) => {
     <div className="space-y-6">
       <div className="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-900/20">
          <div className="relative z-10">
-            <h1 className="text-3xl font-black tracking-tight mb-2">Reward Marketplace</h1>
-            <p className="text-slate-400 text-sm font-medium">Complete daily missions to fuel your points balance.</p>
+            <h1 className="text-3xl font-black tracking-tight mb-2">{t('reward_marketplace')}</h1>
+            <p className="text-slate-400 text-sm font-medium">{t('daily_missions_desc')}.</p>
          </div>
          <div className="absolute right-[-20px] bottom-[-20px] opacity-10 rotate-[30deg]">
             <Gift className="w-48 h-48 text-indigo-400" />
@@ -178,11 +181,11 @@ const getTypeIcon = (type: string) => {
                 <div className="flex items-center gap-4 mt-2">
                    <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs">
                       <ShieldCheck className="w-3.5 h-3.5" />
-                      {task.rewardPoints} Pts
+                      {task.rewardPoints} {t('points')}
                    </div>
                    <div className="flex items-center gap-1.5 text-slate-400 font-bold text-xs">
                       <Clock className="w-3.5 h-3.5" />
-                      {task.requiredSeconds}s Wait
+                      {task.requiredSeconds}s {t('wait')}
                    </div>
                 </div>
               </div>
@@ -193,7 +196,7 @@ const getTypeIcon = (type: string) => {
                     onClick={() => handleTaskAction(task)}
                     className="flex-1 sm:w-32 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
                   >
-                    Start Task
+                    {t('start_task')}
                     <ExternalLink className="w-3 h-3" />
                   </button>
                 )}
@@ -203,13 +206,13 @@ const getTypeIcon = (type: string) => {
                     disabled={verifying === task.id}
                     className="flex-1 sm:w-32 py-3 bg-amber-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-100 hover:bg-amber-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    {verifying === task.id ? 'Verifying...' : 'Verify Now'}
+                    {verifying === task.id ? t('verifying') : t('verify_now')}
                     <ShieldCheck className="w-3 h-3" />
                   </button>
                 )}
                 {status === 'completed' && (
                   <div className="sm:w-32 py-3 bg-emerald-100 text-emerald-600 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 border border-emerald-200">
-                    Claimed
+                    {t('claimed')}
                     <CheckCircle className="w-3 h-3" />
                   </div>
                 )}
@@ -221,8 +224,8 @@ const getTypeIcon = (type: string) => {
         {tasks.length === 0 && (
           <div className="py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
              <AlertCircle className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-             <h3 className="font-bold text-slate-400 uppercase tracking-widest text-xs">No Active Tasks</h3>
-             <p className="text-sm text-slate-500 mt-2">Check back later for new earning opportunities.</p>
+             <h3 className="font-bold text-slate-400 uppercase tracking-widest text-xs">{t('no_active_tasks')}</h3>
+             <p className="text-sm text-slate-500 mt-2">{t('check_back_later')}.</p>
           </div>
         )}
       </div>
@@ -250,8 +253,8 @@ const getTypeIcon = (type: string) => {
                          <Zap className="w-8 h-8 text-white fill-white animate-pulse" />
                       </div>
                       <div>
-                        <h2 className="text-white font-black text-xl tracking-tight">Accessing Reward Pool</h2>
-                        <p className="text-indigo-100/70 text-[10px] font-bold uppercase tracking-widest mt-1">Verifying Human Presence</p>
+                        <h2 className="text-white font-black text-xl tracking-tight">{t('accessing_reward')}</h2>
+                        <p className="text-indigo-100/70 text-[10px] font-bold uppercase tracking-widest mt-1">{t('verifying_human')}</p>
                       </div>
                    </div>
                    <div className="absolute top-[-20px] left-[-20px] w-32 h-32 bg-white/5 rounded-full blur-2xl" />
@@ -272,14 +275,14 @@ const getTypeIcon = (type: string) => {
                         onClick={() => showAdPopup.task && handleFinalStart(showAdPopup.task)}
                         className="w-full h-14 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-black transition-all flex items-center justify-center gap-2"
                       >
-                         Enable Reward
+                         {t('enable_reward')}
                          <ArrowRight className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => setShowAdPopup({ active: false, task: null })}
                         className="w-full py-3 text-slate-400 font-black text-[10px] uppercase tracking-widest hover:text-slate-600 transition-colors"
                       >
-                         Cancel
+                         {t('cancel')}
                       </button>
                    </div>
                 </div>

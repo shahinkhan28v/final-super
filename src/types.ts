@@ -93,6 +93,14 @@ export interface UserQuizAttempt {
   pointsEarned: number;
 }
 
+export interface CustomPage {
+  id: string;
+  title: string;
+  content: string; // Markdown or simple text
+  imageUrl?: string;
+  lastUpdated?: string;
+}
+
 export interface AppSettings {
   conversionRate: number;
   pointsPerUsd: number;
@@ -116,6 +124,9 @@ export interface AppSettings {
   privacyPolicy: string;
   footerAbout: string;
   luckyWheel: LuckyWheelConfig;
+  footerPages?: {
+    [key: string]: CustomPage;
+  };
 }
 
 export interface RewardTask {

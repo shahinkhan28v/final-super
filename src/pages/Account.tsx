@@ -32,10 +32,13 @@ import { getDeviceInfo } from '../lib/deviceUtils';
 import { AppSettings } from '../types';
 import { Link } from 'react-router-dom';
 
+import { useLanguage } from '../lib/LanguageContext';
+
 type View = 'main' | 'notifications' | 'language' | 'password' | 'bank' | 'privacy' | 'help' | 'device_history';
 
 export default function Account() {
   const { profile, logout, updateUserPassword, user } = useAuth();
+  const { locale, setLocale, t } = useLanguage();
   const [view, setView] = useState<View>('main');
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -113,11 +116,11 @@ export default function Account() {
   };
 
   const settingsItems = [
-    { id: 'notifications' as View, icon: Bell, label: 'Notifications', value: 'On', color: 'text-blue-500 bg-blue-50' },
-    { id: 'language' as View, icon: Globe, label: 'Language', value: lang, color: 'text-indigo-500 bg-indigo-50' },
-    { id: 'password' as View, icon: Lock, label: 'Change Password', color: 'text-purple-500 bg-purple-50' },
-    { id: 'bank' as View, icon: CreditCard, label: 'Bank Info', value: profile?.paymentInfo?.method || 'Not Set', color: 'text-emerald-500 bg-emerald-50' },
-    { id: 'privacy' as View, icon: Shield, label: 'Privacy & Security', color: 'text-amber-500 bg-amber-50' },
+    { id: 'notifications' as View, icon: Bell, label: t('notifications'), value: 'On', color: 'text-blue-500 bg-blue-50' },
+    { id: 'language' as View, icon: Globe, label: t('language'), value: locale, color: 'text-indigo-500 bg-indigo-50' },
+    { id: 'password' as View, icon: Lock, label: t('password'), color: 'text-purple-500 bg-purple-50' },
+    { id: 'bank' as View, icon: CreditCard, label: t('bank_info'), value: profile?.paymentInfo?.method || 'Not Set', color: 'text-emerald-500 bg-emerald-50' },
+    { id: 'privacy' as View, icon: Shield, label: t('privacy'), color: 'text-amber-500 bg-amber-50' },
   ];
 
   const renderHeader = (title: string) => (
@@ -130,7 +133,7 @@ export default function Account() {
       </button>
       <div>
         <h2 className="text-xl font-black text-slate-900 tracking-tight">{title}</h2>
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Account Management</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{t('acc_management')}</p>
       </div>
     </div>
   );
@@ -165,13 +168,13 @@ export default function Account() {
 
           <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1 rounded-md border border-emerald-100">
              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-             <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Verified Earner</span>
+             <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">{t('verified_earner')}</span>
           </div>
        </div>
 
        {/* Settings Section */}
        <div className="space-y-3">
-          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] px-1">Account & Preferences</h3>
+          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] px-1">{t('acc_preferences')}</h3>
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
              {settingsItems.map((item, idx) => (
                 <button 
@@ -199,7 +202,7 @@ export default function Account() {
 
        {/* Support Section */}
        <div className="space-y-3">
-          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] px-1">Security & Support</h3>
+          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] px-1">{t('sec_support')}</h3>
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
              <button 
                onClick={() => setView('help')}
@@ -209,7 +212,7 @@ export default function Account() {
                    <div className="w-9 h-9 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center">
                       <HelpCircle className="w-4 h-4" />
                    </div>
-                   <span className="font-bold text-slate-700 text-sm group-hover:text-slate-900">Help Center</span>
+                   <span className="font-bold text-slate-700 text-sm group-hover:text-slate-900">{t('help_center')}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-300" />
              </button>
@@ -223,7 +226,7 @@ export default function Account() {
                         <ShieldCheck className="w-4 h-4" />
                      </div>
                      <div>
-                        <span className="font-bold text-indigo-900 text-sm">Admin Control Panel</span>
+                        <span className="font-bold text-indigo-900 text-sm">{t('admin_panel')}</span>
                         <p className="text-[9px] font-black uppercase tracking-widest text-indigo-400 mt-0.5">System Management</p>
                      </div>
                   </div>
@@ -238,7 +241,7 @@ export default function Account() {
                    <div className="w-9 h-9 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
                       <LogOut className="w-4 h-4" />
                    </div>
-                   <span className="font-bold text-sm">Sign Out</span>
+                   <span className="font-bold text-sm">{t('sign_out')}</span>
                 </div>
                 <ChevronRight className="w-4 h-4 text-rose-300" />
              </button>
@@ -249,7 +252,7 @@ export default function Account() {
           <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">PointHub Engine v1.0.4 r2</p>
           <div className="flex items-center justify-center gap-2 mt-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Connected</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t('network_connected')}</p>
           </div>
        </div>
     </motion.div>
@@ -257,7 +260,7 @@ export default function Account() {
 
   const renderNotifications = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader('Notifications')}
+      {renderHeader(t('notifications'))}
       <div className="space-y-4">
         {[
           { title: 'Push Notifications', desc: 'Alerts for tasks and rewards', icon: Bell },
@@ -285,24 +288,24 @@ export default function Account() {
 
   const renderLanguage = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader('Language')}
+      {renderHeader(t('language'))}
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden divide-y divide-slate-50 shadow-sm">
-        {['English', 'Bengali', 'Hindi', 'Arabic', 'Spanish'].map((l) => (
+        {(['English', 'Bengali', 'Hindi', 'Arabic', 'Spanish'] as const).map((l) => (
           <button 
             key={l}
-            onClick={() => { setLang(l); setView('main'); }}
+            onClick={() => { setLocale(l); setView('main'); }}
             className="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition-colors group"
           >
             <div className="flex items-center gap-4">
               <div className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
-                lang === l ? "bg-indigo-50 text-indigo-600" : "bg-slate-50 text-slate-400"
+                locale === l ? "bg-indigo-50 text-indigo-600" : "bg-slate-50 text-slate-400"
               )}>
                 <Globe className="w-5 h-5" />
               </div>
-              <span className={cn("font-bold text-sm", lang === l ? "text-indigo-600" : "text-slate-700")}>{l}</span>
+              <span className={cn("font-bold text-sm", locale === l ? "text-indigo-600" : "text-slate-700")}>{l}</span>
             </div>
-            {lang === l && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
+            {locale === l && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
           </button>
         ))}
       </div>
@@ -311,17 +314,17 @@ export default function Account() {
 
   const renderBankInfo = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader('Withdrawal Method')}
+      {renderHeader(t('bank_info'))}
       <form onSubmit={handleUpdateBank} className="space-y-6">
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-6">
            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Preferred Method</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">{t('bank_method')}</label>
               <select 
                 value={bankInfo.method}
                 onChange={(e) => setBankInfo({ ...bankInfo, method: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-2xl text-sm font-bold focus:border-indigo-600 outline-none transition-all"
               >
-                <option value="">Select Method</option>
+                <option value="">{t('select_payout')}</option>
                 <option value="Bkash">Bkash (Personal)</option>
                 <option value="Nagad">Nagad (Personal)</option>
                 <option value="Rocket">Rocket (Personal)</option>
@@ -329,7 +332,7 @@ export default function Account() {
               </select>
            </div>
            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">Account Number / Details</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">{t('bank_details')}</label>
               <div className="relative text-left">
                 <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                 <input 
@@ -348,7 +351,7 @@ export default function Account() {
           disabled={loading}
           className="w-full py-4 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 hover:bg-indigo-700 active:scale-95 transition-all"
         >
-          {loading ? 'Saving...' : <><Save className="w-4 h-4" /> Save Bank Info</>}
+          {loading ? '...' : <><Save className="w-4 h-4" /> {t('save_bank')}</>}
         </button>
       </form>
     </motion.div>
@@ -356,7 +359,7 @@ export default function Account() {
 
   const renderPassword = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader(isGoogleUser ? 'Set Account Password' : 'Change Password')}
+      {renderHeader(isGoogleUser ? t('set_pass') : t('change_pass'))}
       
       {isGoogleUser && (
         <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl flex gap-3 mb-6">
@@ -377,7 +380,7 @@ export default function Account() {
            )}
            
            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">New Secure Password</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">{t('new_pass')}</label>
               <div className="relative">
                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                  <input 
@@ -390,7 +393,7 @@ export default function Account() {
               </div>
            </div>
            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">Confirm New Password</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left">{t('confirm_pass')}</label>
               <div className="relative">
                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                  <input 
@@ -409,7 +412,7 @@ export default function Account() {
           disabled={loading}
           className="w-full py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-slate-100 flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-50"
         >
-          {loading ? 'Changing...' : isGoogleUser ? 'Set Password' : 'Update Password'}
+          {loading ? '...' : isGoogleUser ? t('set_pass') : t('update_pass')}
         </button>
         
         <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
@@ -423,7 +426,7 @@ export default function Account() {
 
   const renderPrivacy = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader('Privacy & Safety')}
+      {renderHeader(t('privacy_safety'))}
       <div className="space-y-4">
          <div className="bg-indigo-600 p-6 rounded-3xl text-white text-left">
             <Shield className="w-8 h-8 mb-4 opacity-50" />
@@ -437,7 +440,7 @@ export default function Account() {
                 <Smartphone className="w-5 h-5" />
               </div>
               <div className="text-left">
-                <h4 className="font-bold text-slate-800 text-sm leading-tight">Device History</h4>
+                <h4 className="font-bold text-slate-800 text-sm leading-tight">{t('device_history_title')}</h4>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
                   {profile?.lastIp ? 'Connected' : 'Syncing...'}
                 </p>
@@ -447,18 +450,18 @@ export default function Account() {
               onClick={() => setView('device_history')}
               className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
             >
-              Manage
+              {t('manage')}
             </button>
          </div>
 
          <div className="bg-white p-6 rounded-2xl border border-slate-100 text-left">
             <div className="flex items-center gap-2 text-rose-500 mb-3">
                <AlertCircle className="w-4 h-4" />
-               <span className="text-[10px] font-black uppercase tracking-widest">Danger Zone</span>
+               <span className="text-[10px] font-black uppercase tracking-widest">{t('danger_zone')}</span>
             </div>
-            <h4 className="font-bold text-slate-800 text-sm">Delete Account</h4>
+            <h4 className="font-bold text-slate-800 text-sm">{t('delete_account')}</h4>
             <p className="text-xs text-slate-400 font-medium mt-1 mb-4">Permanently remove all your progress and unspent points.</p>
-            <button className="w-full py-3 border-2 border-rose-100 text-rose-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-colors">Request Account Deletion</button>
+            <button className="w-full py-3 border-2 border-rose-100 text-rose-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-50 transition-colors">{t('request_deletion')}</button>
          </div>
       </div>
     </motion.div>
@@ -466,16 +469,16 @@ export default function Account() {
 
   const renderHelp = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader('Help & Support')}
+      {renderHeader(t('sec_support'))}
       <div className="space-y-4">
          <div className="relative overflow-hidden bg-slate-900 p-8 rounded-3xl text-white text-left">
             <div className="relative z-10">
-               <h3 className="text-2xl font-black mb-2 tracking-tight">How can we help?</h3>
+               <h3 className="text-2xl font-black mb-2 tracking-tight">{t('how_help')}</h3>
                <div className="relative mt-4">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                   <input 
                     type="text" 
-                    placeholder="Search FAQ keywords..."
+                    placeholder={t('search_faq')}
                     className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-2xl text-sm font-medium outline-none focus:bg-white/20 transition-all placeholder:text-slate-500 text-left"
                   />
                </div>
@@ -491,7 +494,7 @@ export default function Account() {
                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
                   <Mail className="w-6 h-6" />
                </div>
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Email Us</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('email_us')}</span>
             </a>
             <Link 
               to="/support/chat"
@@ -500,7 +503,7 @@ export default function Account() {
                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
                   <MessageSquare className="w-6 h-6" />
                </div>
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Chat</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{t('live_chat')}</span>
             </Link>
          </div>
 
@@ -523,7 +526,7 @@ export default function Account() {
 
   const renderDeviceHistory = () => (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      {renderHeader('Device History')}
+      {renderHeader(t('device_history_title'))}
       <div className="space-y-4">
          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden text-left">
             <div className="flex items-center gap-4 relative z-10">
@@ -531,25 +534,25 @@ export default function Account() {
                   <Smartphone className="w-7 h-7" />
                </div>
                <div>
-                  <h3 className="text-lg font-black text-slate-800 tracking-tight">Active Connection</h3>
-                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">This device is active</p>
+                  <h3 className="text-lg font-black text-slate-800 tracking-tight">{t('active_conn')}</h3>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{t('this_device_active')}</p>
                </div>
             </div>
             <div className="mt-6 space-y-4 relative z-10">
                <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Device Model</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('device_model')}</span>
                   <span className="text-sm font-black text-slate-700">{profile?.deviceInfo?.os?.includes('Windows') ? 'Desktop PC' : profile?.deviceInfo?.isMobile ? 'Mobile Device' : 'Tablet/PC'}</span>
                </div>
                <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">OS / Platform</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('os_platform')}</span>
                   <span className="text-sm font-black text-slate-700">{profile?.deviceInfo?.os || 'Unknown'}</span>
                </div>
                <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Browser</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('browser')}</span>
                   <span className="text-sm font-black text-slate-700">{profile?.deviceInfo?.browser || 'Unknown'}</span>
                </div>
                <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Location</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('location')}</span>
                   <div className="flex flex-col items-end gap-1">
                      <div className="flex items-center gap-2">
                         <MapPin className="w-3 h-3 text-indigo-500" />
@@ -565,7 +568,7 @@ export default function Account() {
                   </div>
                </div>
                <div className="flex justify-between items-center py-3">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">IP Address</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('ip_address')}</span>
                   <div className="flex items-center gap-2">
                      <Globe className="w-3 h-3 text-emerald-500" />
                      <span className="text-sm font-black text-slate-700">{profile?.lastIp || 'Detecting...'}</span>
@@ -583,7 +586,7 @@ export default function Account() {
                   }}
                   className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-100 active:scale-95 transition-all"
                >
-                  Refresh Live Location
+                  {t('refresh_location')}
                </button>
                
                <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex gap-3">
