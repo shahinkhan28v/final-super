@@ -33,7 +33,7 @@ const ALL_PERMISSIONS: { id: AdminPermission; label: string; description: string
 ];
 
 export default function AdminAdmins() {
-  const { profile, hasPermission } = useAuth();
+  const { adminRecord, hasPermission } = useAuth();
   const [admins, setAdmins] = useState<AdminRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -46,7 +46,7 @@ export default function AdminAdmins() {
     permissions: [] as AdminPermission[]
   });
 
-  const isSuperAdmin = profile?.role === 'super_admin' || profile?.email === 'shahinkhan28v@gmail.com';
+  const isSuperAdmin = adminRecord?.role === 'super_admin' || hasPermission('manage_admins');
 
   useEffect(() => {
     loadAdmins();
@@ -90,7 +90,7 @@ export default function AdminAdmins() {
   };
 
   const handleDeleteAdmin = async (admin: AdminRecord) => {
-    if (admin.email === profile?.email) {
+    if (admin.email === adminRecord?.email) {
       alert("You cannot remove yourself.");
       return;
     }
@@ -210,7 +210,7 @@ export default function AdminAdmins() {
                   </td>
                   <td className="p-6 text-right">
                     <div className="flex items-center justify-end gap-2">
-                       {isSuperAdmin && admin.email !== profile?.email && (
+                       {isSuperAdmin && admin.email !== adminRecord?.email && (
                          <>
                            <button 
                              onClick={() => handleDeleteAdmin(admin)}

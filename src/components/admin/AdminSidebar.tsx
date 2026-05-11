@@ -49,7 +49,7 @@ interface Category {
 }
 
 export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
-  const { logout, hasPermission } = useAuth();
+  const { logout, hasPermission, adminRecord } = useAuth();
   const [collapsedCategories, setCollapsedCategories] = useState<string[]>([]);
 
   const categories: Category[] = [
@@ -115,7 +115,9 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             </div>
             <div className="flex flex-col">
               <span className="text-slate-900 font-black tracking-tight leading-none text-lg">PointHub</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Admin Control</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                {adminRecord?.role === 'super_admin' ? 'Super Admin' : 'Staff Portal'}
+              </span>
             </div>
           </div>
           <button 
